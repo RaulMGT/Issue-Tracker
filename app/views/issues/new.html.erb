@@ -1,0 +1,23 @@
+
+ <div class="frame-wrapper">
+    <h1>Issues</h1>
+    <h3>Create issue</h3>
+ 
+	
+
+    <div class="create-issue-form">
+    	<%= form_with(model: @issue, local: true) do |form| %>
+	    <%= render 'form', issue: @issue, form: form %>
+          <%= form.hidden_field :user_id, :value => current_user.id%>
+	      <div class="actions">
+    <!-- TODO: SUBMIT HIDDEN FIELDS -->
+    		<div class="actions_wrapper">
+		      <%= form.submit "Create issue", :class => "btn primary"%>
+		      <%= link_to 'Cancel', issues_path, :class => "link margin-left-sm" %>
+		    </div>
+  		</div>
+	    <% end %>
+	</div>
+	
+</div>
+ 

@@ -1,0 +1,210 @@
+<div id="issue-detail" class="frame-wrapper">
+  <h1><%= @issue.title %></h1>
+
+  <div class="horizontal" style="align-items: center;">
+    <span> Issue #<%= @issue.id %></span>
+    <span class="issue-detail-status"> <%= Status.find(@issue.status_id).name %> </span>
+    <div class="filters-banner">
+      <%= link_to 'Create issue', new_issue_path, :class => "filter-btn secondary" %>
+    </div>
+  </div>
+
+  <!-- Contenido issue + info + botones -->
+  <div id="issue-detail-inner-wrapper">
+
+    <div id="left-part">
+      <div class="creator-wrapper <%= 'spam' if @issue.spam? %>">
+        <%= image_tag ("pictures/default.png") %>
+        <div class="creator-info">
+          <div>
+            <span>
+              <%= link_to User.find(@issue.user_id).name, issues_path(:responsible => User.find(@issue.user_id).email), :class => "primary-text bold" %>
+            </span> created an issue
+            <span class="secondary-text sm-text"><%= @issue.created_at.to_formatted_s(:long) %></span>
+          </div>
+          <span class="margin-top-xsm"><%= @issue.description %></span>
+
+          <div class="attachment <%= 'hidden' if !@issue.attachment? %>" >
+            <div class="thumbnail">
+              <div class="placeholder">
+                <%= link_to image_tag("clip.png"), @issue.attachment.url(:original, false), :class => "placeholder" %>
+              </div>
+              <div class="delete-attachment-wrapper">
+                <%= link_to image_tag("delete-attachment.svg", :class => 'delete-attachment-icon hidden'), @issue, method: :delete_attachment %>
+              </div>
+            </div>
+            <div class="info">
+              <%= link_to @issue.attachment.original_filename, @issue.attachment.url(:original, false), :class => 'link' if @issue.attachment? %>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <h3>Comments (<%= @comments.length %>)</h3>
+
+      <div id="comments-section">
+        <% @comments.each do |comment| %>
+            <div class="comment <%= 'spam' if comment.spam? %>" id="comment_<%= comment.id %>">
+              <%= image_tag ('pictures/default.png') %>
+              <div class="comment-info">
+                <span class="primary-text bold"><%= (User.find_by id: comment[:user_id]).name %></span>
+                <span class="comment-description"><%= comment[:description] %></span>
+
+                <div class="edit-comment-form-wrapper hidden">
+                  <%= form_tag(comments_path(comment_id: comment.id, issue_id: @issue.id), method: "PATCH") do %>
+                      <%= text_area_tag :description, comment[:description], size: '24x6' %>
+                      <div class="edit-comment-form-buttons">
+                        <%= submit_tag('Comment', :class => "btn primary margin-left-sm") %>
+                        <%= link_to 'Cancel', 'javascript:;', :class => "cancel-edit-comment-btn link margin-left-sm", "comment-id" => comment.id %>
+                      </div>
+                  <% end %>
+                </div>
+
+
+                <div class="comment-buttons">
+                  <%= link_to 'Edit', 'javascript:;', :class => "edit-comment-btn", "comment-id" => comment.id %> -
+                  <%= link_to comment.spam ? 'Approve - ' : 'Mark as spam - ', comments_path(comment_id: comment.id), method: :put %>
+                  <%= link_to 'Delete', comments_path(comment_id: comment.id, issue_id: @issue.id), method: :delete %> -
+                  <%= comment.created_at.to_formatted_s(:short) %>
+                </div>
+              </div>
+            </div>
+        <% end %>
+
+        <div id="new-comment-area">
+          <div>
+            <%= image_tag ('pictures/default.png') %>
+          </div>
+          <div id="new-comment-form-wrapper">
+            <%= form_for @comment do |f| %>
+                <%= f.text_field :description, placeholder: 'What do you want to say?', size: '24x6', :id => "mock-textarea" %>
+                <%= f.hidden_field :issue_id, value: @issue.id %>
+                <%= f.hidden_field :user_id, value: current_user.id %>
+
+                <div id="create-comment-wrapper" class="hidden">
+                  <%= f.text_area :description, placeholder: 'What do you want to say?', size: '24x6', :id => "valid-textarea" %>
+                  <div id="new-comment-form-buttons">
+                    <%= submit_tag('Comment', :class => "btn primary margin-left-sm") %>
+                    <%= link_to 'Back', 'javascript:;', :class => "link margin-left-sm", :id => "create-comment-back" %>
+                  </div>
+                </div>
+
+            <% end %>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="right-part">
+      <div class="buttons">
+        <%= link_to "Resolve", issues_path(issue_id: @issue.id, status_id: 3), method: "PATCH", :class => "btn-md primary margin-left-sm" %>
+        <%= link_to '#', :id => 'workflow-btn', :class => "btn-md secondary margin-left-sm dropdown-btn" do %>
+            Workflow <%= image_tag ('arrow-down.png'), :class => "small-icon" %>
+        <% end %>
+
+        <div id="workflow-dropdown-btn" class="dropdown-wrapper">
+          <% @status.each do |status| %>
+              <%= link_to issues_path(issue_id: @issue.id, status_id: status.id), method: "PATCH" do %>
+                  <div><%= status.name %></div>
+              <% end %>
+          <% end %>
+        </div>
+
+
+        <%= link_to '#', :id => 'more-btn', :class => "btn-xsm secondary margin-left-sm dropdown-btn" do %>
+            More <%= image_tag ('arrow-down.png'), :class => "small-icon" %>
+        <% end %>
+
+        <div id="more-dropdown-btn" class="dropdown-wrapper">
+          <%= link_to issues_path(issue_id: @issue.id), method: :put do %>
+              <div><%= @issue.spam ? 'Approve' : 'Mark as spam' %></div>
+          <% end %>
+          <%= link_to @issue, method: :delete, data: {confirm: 'Are you sure?'} do %>
+              <div>Delete</div>
+          <% end %>
+        </div>
+
+        <%= link_to 'Edit', edit_issue_path(@issue), :class => "btn-xxsm secondary margin-left-sm" %>
+      </div>
+      <div class="issue-details-summary">
+
+        <table id="details-fields-table">
+          <tr>
+            <td>Asignee</td>
+            <td class="primary-text value">
+              <% if @issue.user_id_2.present? %>
+                  <%= image_tag("pictures/default.png", :class => "small-icon rounded") %>
+                  <%= link_to User.find(@issue.user_id_2).name, issues_path(:responsible => User.find(@issue.user_id_2).email), :class => "margin-left-xsm underline-hover" %>
+              <% else %>
+                  -
+              <% end %>
+            </td>
+          </tr>
+          <tr>
+            <td>Type</td>
+            <td class="primary-text value">
+              <%= image_tag("kinds/" + Kind.find(@issue.kind_id).name.downcase + ".svg") %>
+              <%= link_to Kind.find(@issue.kind_id).name, issues_path(:kind => Kind.find(@issue.kind_id).name), :class => "margin-left-xsm underline-hover" %>
+            </td>
+          </tr>
+          <tr>
+            <td>Priority</td>
+            <td class="primary-text value">
+              <%= image_tag("priorities/" + Priority.find(@issue.priority_id).name.downcase + ".svg", :class => "small-icon") %>
+              <%= link_to Priority.find(@issue.priority_id).name, issues_path(:priority => Priority.find(@issue.priority_id).name), :class => "margin-left-xsm underline-hover" %>
+            </td>
+          </tr>
+          <tr>
+            <td>Status</td>
+            <td class="primary-text">
+              <%= link_to Status.find(@issue.status_id).name, issues_path(:status => Status.find(@issue.status_id).name), :class => "underline-hover" %>
+            </td>
+          </tr>
+          <tr>
+            <td>Votes</td>
+            <td class="primary-text value">
+              <span class="rounded-count <%= Vote.where(issue_id: @issue.id, user_id: current_user.id).any? ? 'blue' : 'grey' %> "> <%= @issue.votes.count %></span>
+              <div class="margin-left-xsm">
+                <% if Vote.where(issue_id: @issue.id, user_id: current_user.id).any? %>
+                    <%= link_to "Remove vote", votes_path(user_id: current_user.id, issue_id: @issue.id), method: :delete, :class => "underline-hover" %>
+                <% else %>
+                    <%= form_for @vote, :html => {:id => "vote-form"} do |f| %>
+                        <%= f.hidden_field :issue_id, value: @issue.id %>
+                        <%= f.hidden_field :user_id, value: current_user.id %>
+                        <%= link_to 'Vote for this issue', "", :onclick => "$('#vote-form').submit()", :class => "underline-hover" %>
+                    <% end %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>Watchers</td>
+            <td class="primary-text value">
+              <span class="rounded-count <%= Watch.where(issue_id: @issue.id, user_id: current_user.id).any? ? 'blue' : 'grey' %> "> <%= @issue.watches.count %></span>
+              <div class="margin-left-xsm">
+                <% if Watch.where(issue_id: @issue.id, user_id: current_user.id).any? %>
+                    <%= link_to "Stop watching", watches_path(user_id: current_user.id, issue_id: @issue.id), method: :delete, :class => "underline-hover" %>
+                <% else %>
+                    <%= form_for @watch, :html => {:id => "watch-form"} do |f| %>
+                        <%= f.hidden_field :issue_id, value: @issue.id %>
+                        <%= f.hidden_field :user_id, value: current_user.id %>
+                        <%= link_to 'Watch this issue', "", :onclick => "$('#watch-form').submit()", :class => "underline-hover" %>
+                    <% end %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        </table>
+
+      </div>
+    </div>
+  </div>
+  <!-- END Contenido issue + info + botones -->
+
+
+  <%= link_to 'Back', issues_path, :class => "btn-sm secondary margin-top-lg" %>
+
+
+</div>

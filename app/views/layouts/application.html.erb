@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ASW Issue Tracker</title>
+    <%= csrf_meta_tags %>
+
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+
+  <body>
+  <div id="alert-container">
+    <% flash.each do |message_type, message| %>
+        <div class="alert alert-dismissable fade in alert-<%= message_type %> floating-alert">
+          <span><%= message %></span>
+          <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        </div>
+
+    <% end %>
+  </div>
+
+
+    <div id="app_wrapper">
+      <%= render :partial => "shared/menubar" if logged_in? %>
+      <%= yield(:menubar) if content_for?(:menubar) %>
+      <div id="content_wrapper">
+          <%= yield %> 
+      </div>
+    </div>
+  </body>
+</html>

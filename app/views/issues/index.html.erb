@@ -1,0 +1,85 @@
+<div class="frame-wrapper">
+    <h1>Issues</h1>
+
+    <div class="horizontal" style="align-items: center;">
+      <span>FILTER BY: </span>
+      <%= link_to 'All', issues_path, :class => "filter-btn transparent margin-left-sm" %>
+      <%= link_to 'Open', issues_path(:status => 'open'), :class => "filter-btn transparent margin-left-sm" %>
+      <%= link_to 'My issues', issues_path(:responsible => current_user.email), :class => "filter-btn transparent margin-left-sm" %>
+      <%= link_to 'Watching', issues_path(:watching => current_user.email), :class => "filter-btn transparent margin-left-sm" %>
+      <div class="filters-banner">
+          <%= link_to 'Create issue', new_issue_path, :class => "filter-btn secondary" %>
+
+      </div>
+    </div>
+
+    <h4>Issues (1 – <%= @issues.count %> of <%= @issues.count %>)</h4>
+
+    <table class="issues-table">
+      <thead>
+        <tr>
+          <th style="flex: 1;">Title</th>
+          <th style="width: 45px;">T</th>
+          <th style="width: 45px;">P</th>
+          <th style="width: 100px;">Status</th>
+          <th style="width: 100px;">Votes</th>
+          <th style="width: 180px; text-overflow: ellipsis;">Assignee</th>
+          <th style="width: 130px;">Created</th>
+          <th style="width: 120px;">Updated</th>
+          <th style="width: 30px"></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% @issues.each do |issue| %>
+          <tr class="<%= 'spam' if issue.spam? %>">
+            <td class="title primary-text">
+              <%= link_to "#" + issue.id.to_s + ": " + issue.title, issue %>    
+            </td>
+            <td>
+              <%= link_to image_tag("kinds/" + Kind.find(issue.kind_id).name.downcase + ".svg"), issues_path(:kind => Kind.find(issue.kind_id).name) %>
+            </td>
+            <td>
+              <!--<%= link_to Priority.find(issue.priority_id).name, issues_path(:priority => Priority.find(issue.priority_id).name) %>-->
+              <%= link_to image_tag("priorities/" + Priority.find(issue.priority_id).name.downcase + ".svg", :class => "small-icon" ), issues_path(:priority => Priority.find(issue.priority_id).name) %>
+            </td>
+            <td class="status-cell">
+              <span>
+                <%= link_to Status.find(issue.status_id).name, issues_path(:status => Status.find(issue.status_id).name) %>
+              </span>
+            </td>
+            <td class="votes-cell">
+              <% if issue.votes.count > 0 %>
+                  <span class="rounded-count blue"><%= issue.votes.count %></span>
+              <% end %>
+            </td>
+            <td>
+              <div class="issues-user-cell">
+                <% if issue.user_id_2.present? %>
+                <%= image_tag ("pictures/default.png") %>
+                <%= link_to User.find(issue.user_id_2).name, issues_path(:responsible => User.find(issue.user_id_2).email) %>
+                <% end %>
+              </div>
+            </td>
+            <td><%= issue.created_at.to_formatted_s(:short) %></td>
+            <td><%= issue.updated_at.to_formatted_s(:short) %></td>
+            <td>
+              <div class="watch-cell hidden">
+                <%= form_for @watch, :html => {:id => "watch-form-" + issue.id.to_s} do |f| %>
+                    <%= f.hidden_field :issue_id, value: issue.id %>
+                    <%= f.hidden_field :user_id, value: current_user.id %>
+
+                    <% if Watch.where(issue_id: issue.id, user_id: current_user.id).any? %>
+                        <%= link_to image_tag("watches/watching.svg", :class => "small-icon" ), watches_path(user_id: current_user.id , issue_id: issue.id), method: :delete%>
+                    <% else %>
+                        <%= link_to image_tag("watches/not-watching.svg", :class => "small-icon" ), "", :onclick => "$('#watch-form-" + issue.id.to_s + "').submit()" %>
+                    <% end %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+</div>

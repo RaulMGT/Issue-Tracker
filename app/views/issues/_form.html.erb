@@ -1,0 +1,50 @@
+
+  <% if issue.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(issue.errors.count, "error") %> prohibited this issue from being saved:</h2>
+ 
+      <ul>
+      <% issue.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+ 
+  <div class="field">
+    <%= form.label :title, :class => "form-label required" %>
+    <%= form.text_field :title, id: :issue_title, :class => "lg-input" %>
+  </div>
+ 
+  <div class="field">
+    <%= form.label :description, :class => "form-label"  %>
+    <%= form.text_area :description, id: :issue_description , :class => "lg-textarea" %>
+  </div>
+ 
+  <div class="field">
+    <%= form.label :assignee, :class => "form-label"  %>
+    <div class="vertical">
+      <%=form.collection_select :user_id_2, User.all, :id , :name_email, { :prompt => "Select user" }, { :class => "md-input", :id => 'form-asignee-select'} %>
+      <%= link_to "Assign to me", 'javascript:;', :id => 'assign-me-btn', :class => "link margin-top-xsm", :my_id => current_user.id %>
+    </div>
+  </div>
+ 
+ 
+  <div class="field">
+    <%= form.label :kind, :class => "form-label required"  %>
+     <%= form.collection_select :kind_id, Kind.all, :id, :name %>
+  </div>
+ 
+  <div class="field">
+    <%= form.label :priority, :class => "form-label required"  %>
+     <%= form.collection_select :priority_id, Priority.all, :id, :name %>
+  </div>
+ 
+  <div class="field">
+    <%= form.label :attachment, :class => "form-label"  %>
+    <%= form.file_field :attachment, :class => "lg-input"  %>
+  </div>
+
+ 
+
+ 

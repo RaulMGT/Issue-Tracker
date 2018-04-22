@@ -1,0 +1,17 @@
+<% content_for(:menubar) do %>
+    <div id="menubar">
+      <div class="logo">
+        <%= link_to image_tag("logo-upc.png"), issues_path %>
+      </div>
+      <div class="user-picture">
+        <%= image_tag ("pictures/default.png"), :id => "menuUserImageButton" %>
+        <div id="dropdown-menu">
+            <div id="content">
+              <span id="user-name"><%= current_user.name %></span>
+              <%= link_to "Log out", logout_path, method: :delete %>
+            </div>
+        </div>
+      </div>
+    </div>
+<% end %> 
+

@@ -1,0 +1,27 @@
+<% provide(:title, 'Sign up') %>
+
+<div id="login-container">
+  <div id="login-inner-wrapper">
+
+    <p id="company-text">
+      <%= image_tag ('atlassianicon.png') %>ASW
+    </p>
+    <p id="app-name-text">Issue Tracker</p>
+
+
+    <%= form_for(@user, url: signup_path) do |f| %>
+      <%= render 'shared/error_messages' %>
+
+      <%= f.text_field :name, :placeholder => 'Full name', :class => 'btn-xxl input-field' %>
+      <%= f.email_field :email, :placeholder => 'Email', :class => 'btn-xxl input-field' %>
+      <%= f.password_field :password, :placeholder => 'Password', :class => 'btn-xxl input-field' %>
+      <%= f.password_field :password_confirmation, :placeholder => 'Password confirmation', :class => 'btn-xxl input-field' %>
+      <div id="buttons-wrapper">
+        <%= f.submit 'Create account',:id => 'login-btn' %>
+        <%= link_to 'Back', new_user_url, :class => "link margin-left-sm" %>
+      </div>
+
+
+  <% end %>
+  </div>
+</div>
